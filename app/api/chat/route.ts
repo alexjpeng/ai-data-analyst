@@ -10,15 +10,22 @@ function getSystemPrompt(datasetPath: string) {
 - Use pandas for data manipulation and analysis
 - Use matplotlib or seaborn for visualizations
 - Always create new figures with plt.figure() before plotting
-- Save plots to display them: plt.savefig('temp.png'); with plt.close() after
+- Always use plt.show() to display plots
+- Make sure to close figures with plt.close() after showing them
 - Install required packages using pip if needed
 - The CSV file is located at: ${datasetPath}
 - Always explain your analysis in simple terms
 - When creating charts, use clear titles, labels, and legends
 
-Example of reading the CSV:
+Example of reading the CSV and creating a plot:
 import pandas as pd
-df = pd.read_csv('${datasetPath}')`;
+import matplotlib.pyplot as plt
+
+df = pd.read_csv('${datasetPath}')
+plt.figure(figsize=(10, 6))
+# Create your plot here
+plt.show()
+plt.close()`;
 }
 
 const tools: Array<CompletionCreateParams.Tool> = [
@@ -79,42 +86,28 @@ export async function POST(req: Request) {
               if (toolCall?.function?.name === 'execute_python') {
                 try {
                   const code = JSON.parse(toolCall.function.arguments).code;
-                  const execution = await sandbox.runCode(code);
+                  const execution = await sandbox.runCode(code, { 
+                    onResult: result => {
+                      console.log('result:', result);
+                      // Handle results immediately as they arrive
+                      if(result.png) {
+                        controller.enqueue(`\n![Generated Chart](${result.png})\n\n`);
+                      }
+                    },
+                    onStdout: data => {
+                      controller.enqueue(data.line);
+                    },
+                    onStderr: data => {
+                      controller.enqueue(`Error: ${data.line}`);
+                    },
+                    onError: error => {
+                      controller.enqueue(`Execution error: ${error.value}\n${error.traceback}\n`);
+                    }
+                  });
                   
                   if (execution.error) {
                     controller.enqueue(`Error: ${execution.error.value}\n${execution.error.traceback}\n`);
                     continue;
-                  }
-
-                  // Handle stdout logs
-                  if (execution.logs.stdout.length > 0) {
-                    controller.enqueue(execution.logs.stdout.join('\n') + '\n');
-                  }
-
-                  // Handle stderr logs
-                  if (execution.logs.stderr.length > 0) {
-                    controller.enqueue(`Error output:\n${execution.logs.stderr.join('\n')}\n`);
-                  }
-
-                  // Process results
-                  for (const result of execution.results) {
-                    // Handle different result types
-                    if (result.png) {
-                      controller.enqueue(`![Chart](data:image/png;base64,${result.png})\n`);
-                    } else if (result.text) {
-                      controller.enqueue(result.text + '\n');
-                    } else if (result.html) {
-                      controller.enqueue(result.html + '\n');
-                    } else if (result.markdown) {
-                      controller.enqueue(result.markdown + '\n');
-                    }
-
-                    // Handle DataFrame or other data structures
-                    if (result.data) {
-                      controller.enqueue(`\`\`\`
-${JSON.stringify(result.data, null, 2)}
-\`\`\`\n`);
-                    }
                   }
                 } catch (error) {
                   controller.enqueue(`Error executing code: ${error.message}\n`);
@@ -126,16 +119,6 @@ ${JSON.stringify(result.data, null, 2)}
           }
         } catch (error) {
           controller.enqueue(`Stream error: ${error.message}\n`);
-        // } finally {
-        //   controller.close();
-        //   // Clean up sandbox in the finally block
-        //   if (sandbox) {
-        //     try {
-        //       await sandbox.kill();
-        //     } catch (error) {
-        //       console.error('Error closing sandbox:', error);
-        //     }
-        //   }
         }
       },
     });
@@ -143,14 +126,6 @@ ${JSON.stringify(result.data, null, 2)}
     return new StreamingTextResponse(stream);
   } catch (error) {
     console.error('Chat error:', error);
-    // Clean up sandbox in case of error
-    // if (sandbox) {
-    //   try {
-    //     await sandbox.kill();
-    //   } catch (closeError) {
-    //     console.error('Error closing sandbox:', closeError);
-    //   }
-    // }
     return new Response(JSON.stringify({ error: 'Error processing chat request' }), {
       status: 500,
       headers: { 'Content-Type': 'application/json' },

@@ -138,9 +138,28 @@ export default function Home() {
                 <ReactMarkdown
                   className={`prose ${message.role === 'user' ? 'prose-invert' : ''} max-w-none`}
                   components={{
-                    img: ({ node, ...props }) => (
-                      <img {...props} className="max-w-full h-auto rounded-lg my-2" />
-                    ),
+                    img: ({ node, ...props }) => {
+                      // Check if the src is a base64 image
+                      const src = props.src?.startsWith('data:image/') 
+                        ? props.src 
+                        : props.src?.startsWith('iVBOR') 
+                          ? `data:image/png;base64,${props.src}`
+                          : props.src;
+
+                      return (
+                        <img 
+                          {...props}
+                          src={src}
+                          decoding="async" 
+                          loading="lazy"
+                          className="max-w-full h-auto rounded-lg my-2"
+                          style={{
+                            maxHeight: '400px',
+                            objectFit: 'contain'
+                          }}
+                        />
+                      );
+                    },
                     pre: ({ node, ...props }) => (
                       <pre {...props} className="bg-gray-800 text-gray-100 rounded-lg p-4 overflow-x-auto" />
                     ),
