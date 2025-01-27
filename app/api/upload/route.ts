@@ -21,12 +21,9 @@ export async function POST(req: NextRequest) {
       timeoutMs: 300_000
     });
 
-    // Convert file to buffer
+    // Convert file to buffer and write to sandbox
     const arrayBuffer = await file.arrayBuffer();
-    const buffer = Buffer.from(arrayBuffer);
-
-    //Write file to sandbox
-    const dataSetPath = await sandbox.files.write('/home/user/dataset.csv', buffer);
+    const dataSetPath = await sandbox.files.write('/home/user/dataset.csv', arrayBuffer);
 
     // Install required Python packages
     await sandbox.runCode(`

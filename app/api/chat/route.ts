@@ -1,6 +1,6 @@
 import { Sandbox } from '@e2b/code-interpreter';
 import { Groq } from 'groq-sdk';
-import { CompletionCreateParams } from 'groq-sdk/src/resources/chat/completions';
+import { CompletionCreateParams } from 'groq-sdk/resources/chat/completions';
 import { StreamingTextResponse, Message } from 'ai';
 
 const MODEL_NAME = 'llama3-70b-8192';
