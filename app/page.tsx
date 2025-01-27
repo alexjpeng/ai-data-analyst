@@ -163,7 +163,7 @@ export default function Home() {
                     pre: ({ node, ...props }) => (
                       <pre {...props} className={`${message.role === 'user' ? 'bg-blue-600' : 'bg-gray-800'} text-gray-100 rounded-lg p-4 overflow-x-auto`} />
                     ),
-                    code: ({ node, inline, ...props }) => (
+                    code: ({ node, inline, ...props }: { node?: any; inline?: boolean; children?: any } & React.HTMLAttributes<HTMLElement>) => (
                       inline ? (
                         <code {...props} className={`${
                           message.role === 'user' 
