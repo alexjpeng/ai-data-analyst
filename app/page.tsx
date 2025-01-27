@@ -136,7 +136,7 @@ export default function Home() {
                 }`}
               >
                 <ReactMarkdown
-                  className={`prose ${message.role === 'user' ? 'prose-invert' : ''} max-w-none`}
+                  className={`prose ${message.role === 'user' ? 'prose-invert text-white [&_*]:text-white' : ''} max-w-none`}
                   components={{
                     img: ({ node, ...props }) => {
                       // Check if the src is a base64 image
@@ -161,18 +161,16 @@ export default function Home() {
                       );
                     },
                     pre: ({ node, ...props }) => (
-                      <pre {...props} className="bg-gray-800 text-gray-100 rounded-lg p-4 overflow-x-auto" />
+                      <pre {...props} className={`${message.role === 'user' ? 'bg-blue-600' : 'bg-gray-800'} text-gray-100 rounded-lg p-4 overflow-x-auto`} />
                     ),
                     code: ({ node, inline, ...props }) => (
                       inline ? (
-                        // Inline code styling
                         <code {...props} className={`${
                           message.role === 'user' 
                             ? 'bg-blue-600 text-white' 
                             : 'bg-gray-200 text-gray-800'
                         } rounded px-1`} />
                       ) : (
-                        // Block code styling (within pre tags)
                         <code {...props} className="text-gray-100" />
                       )
                     ),
