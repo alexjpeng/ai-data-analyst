@@ -3,7 +3,7 @@
 import { useChat } from 'ai/react';
 import { useCallback, useState } from 'react';
 import { useDropzone } from 'react-dropzone';
-import { FiSend, FiUpload, FiX } from 'react-icons/fi';
+import { FiSend, FiUpload, FiX, FiTrash2 } from 'react-icons/fi';
 import ReactMarkdown from 'react-markdown';
 
 interface UploadedFile extends File {
@@ -14,7 +14,7 @@ interface UploadedFile extends File {
 export default function Home() {
   const [uploadedFiles, setUploadedFiles] = useState<UploadedFile[]>([]);
   const [uploading, setUploading] = useState(false);
-  const { messages, input, handleInputChange, handleSubmit: handleChatSubmit } = useChat();
+  const { messages, setMessages, input, handleInputChange, handleSubmit: handleChatSubmit } = useChat();
 
   const onDrop = useCallback(async (acceptedFiles: File[]) => {
     setUploading(true);
@@ -120,7 +120,7 @@ export default function Home() {
         )}
 
         {/* Chat Messages */}
-        <div className="flex-1 overflow-auto mb-4 space-y-4 p-4">
+        <div className="flex-1 overflow-auto mb-4 space-y-4 p-4 relative">
           {messages.map((message, i) => (
             <div
               key={i}
@@ -185,6 +185,16 @@ export default function Home() {
 
         {/* Input Form */}
         <form onSubmit={handleSubmit} className="flex gap-2">
+          {messages.length > 0 && (
+            <button
+              type="button"
+              onClick={() => setMessages([])}
+              className="px-4 py-2 text-gray-500 hover:text-red-500 hover:bg-gray-100 rounded-lg transition-colors"
+              aria-label="Clear chat"
+            >
+              <FiTrash2 />
+            </button>
+          )}
           <input
             value={input}
             onChange={handleInputChange}
