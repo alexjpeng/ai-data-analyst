@@ -3,7 +3,7 @@ import { Groq } from 'groq-sdk';
 import { CompletionCreateParams } from 'groq-sdk/resources/chat/completions';
 import { StreamingTextResponse, Message } from 'ai';
 
-const MODEL_NAME = 'llama3-70b-8192';
+const MODEL_NAME = 'llama-3.3-70b-versatile';
 
 function getSystemPrompt(datasetPath: string) {
   return `You are a data analyst assistant. You help users analyze their CSV data and create visualizations. When working with data:
@@ -86,6 +86,7 @@ export async function POST(req: Request) {
               if (toolCall?.function?.name === 'execute_python') {
                 try {
                   const code = JSON.parse(toolCall.function.arguments).code;
+                  controller.enqueue(`\n\`\`\`python\n${code}\n\`\`\`\n\n`);
                   const execution = await sandbox.runCode(code, { 
                     onResult: result => {
                       console.log('result:', result);
