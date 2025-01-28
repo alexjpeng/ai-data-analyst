@@ -5,6 +5,7 @@ import { useCallback, useState } from 'react';
 import { useDropzone } from 'react-dropzone';
 import { FiSend, FiUpload, FiX, FiTrash2 } from 'react-icons/fi';
 import ReactMarkdown from 'react-markdown';
+import InteractiveChart from './components/InteractiveChart';
 
 interface UploadedFile extends File {
   sandboxId: string;
@@ -14,7 +15,7 @@ interface UploadedFile extends File {
 export default function Home() {
   const [uploadedFiles, setUploadedFiles] = useState<UploadedFile[]>([]);
   const [uploading, setUploading] = useState(false);
-  const { messages, setMessages, input, handleInputChange, handleSubmit: handleChatSubmit } = useChat();
+  const { messages, setMessages, input, handleInputChange, handleSubmit: handleChatSubmit, data } = useChat();
 
   const onDrop = useCallback(async (acceptedFiles: File[]) => {
     setUploading(true);
@@ -176,8 +177,18 @@ export default function Home() {
                     ),
                   }}
                 >
+                
                   {message.content}
                 </ReactMarkdown>
+                {/* Add InteractiveChart component if chart annotation exists */}
+                {message.annotations?.map((annotation: any, index: number) => (
+                  annotation.chart && (
+                    <InteractiveChart 
+                      key={`chart-${index}`}
+                      data={annotation.chart} 
+                    />
+                  )
+                ))}
               </div>
             </div>
           ))}

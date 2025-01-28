@@ -56,7 +56,6 @@ npm run dev
 - Groq AI with Llama 3.1 model
 - Vercel AI SDK
 - TailwindCSS for styling
-- React Dropzone for file uploads
 
 ## License
 

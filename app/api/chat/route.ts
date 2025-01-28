@@ -91,8 +91,13 @@ export async function POST(req: Request) {
                     onResult: result => {
                       console.log('result:', result);
                       // Handle results immediately as they arrive
+                        
                       if(result.png) {
                         controller.enqueue(`\n![Generated Chart](${result.png})\n\n`);
+                      }
+
+                      if(result.chart) {
+                        controller.enqueue(`\n![Generated Chart](${result.chart})\n\n`);
                       }
                     },
                     onStdout: data => {
